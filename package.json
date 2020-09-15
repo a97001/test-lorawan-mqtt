@@ -1,0 +1,27 @@
+{
+  "name": "test-lorawan-mqtt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a97001/test-lorawan-mqtt.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/a97001/test-lorawan-mqtt/issues"
+  },
+  "homepage": "https://github.com/a97001/test-lorawan-mqtt#readme",
+  "dependencies": {
+    "binary-parser": "^1.6.2",
+    "bit-buffer": "^0.2.4",
+    "bitwise": "^2.0.4",
+    "eslint": "^7.9.0",
+    "mosca": "^2.8.3",
+    "node-bitarray": "^0.1.0"
+  }
+}

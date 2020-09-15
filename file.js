@@ -1,0 +1,1 @@
+[{"channel":902300000, "sf":10, "time":"2020-09-15T19:47:13+08:00", "gwip":"192.168.0.102", "gwid":"000080029c601e41", "repeater":"00000000ffffffff", "systype":0, "rssi":-126.5, "snr":-11.5, "snr_max":-9.5, "snr_min":-14.5, "macAddr":"0000000000000007", "data":"010b3b243a", "frameCnt":29644, "fport":106, "devEUI":"58a0cb000010afd1"}]
