@@ -22,6 +22,7 @@
     "bitwise": "^2.0.4",
     "eslint": "^7.9.0",
     "mosca": "^2.8.3",
-    "node-bitarray": "^0.1.0"
+    "node-bitarray": "^0.1.0",
+    "packet": "git://github.com/a97001/packet.git#v0.0.6-hot-fix"
   }
 }
