@@ -1,5 +1,6 @@
 var mosca = require('mosca');
 var packet = require('packet');
+const axios = require('axios');
 
 var parser = packet.createParser();
 var serializer = parser.createSerializer();
@@ -7,6 +8,9 @@ var downlinkTopic = "GIOT-GW/DL/000080029c601e41";
 var downlinkClientId = "abc";
 
 const fs = require('fs');
+
+const negaportId = "5f6b1bf629904508fca01555";
+const negaportToken = "7b4a3e2fc8897138469864751a67116d";
 
 const sensorList = [
     {
@@ -206,16 +210,15 @@ server.on('published', function (packet, client) {
         });
     } else if (packet.payload instanceof Buffer) {
         const jsonMQTTPayload = JSON.parse(packet.payload.toString());
-        console.log(jsonMQTTPayload);
+        // console.log(jsonMQTTPayload);
         if (Array.isArray(jsonMQTTPayload)) {
             for (const jsonPayload of jsonMQTTPayload) {
                 fs.writeFileSync('./file.js', packet.payload);
                 const devEUI = jsonPayload.devEUI.toUpperCase();
                 if (jsonPayload.data && jsonPayload.data !== '') {
-                    console.log(devEUI, jsonPayload.data);
+                    console.log(jsonPayload.time, devEUI, jsonPayload.data);
                     const data = Buffer.from(jsonPayload.data, 'hex');
                     const sensor = sensorList.find(s => s.devEUI === devEUI);
-
                     if (sensor) {
                         sensor.macAddr = jsonPayload.macAddr;
                         if (sensor.sensorType === "object_locator") {
@@ -227,6 +230,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.lon = (parsedPayload.lon / 1000000);
                                 parsedPayload.acc = 2 ** (parsedPayload.acc + 2);
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         } else if (sensor.sensorType === "temperature_humidity") {
                             parser.extract("temperature_humidity", function (parsedPayload) {
@@ -234,6 +238,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.batteryLevel = 100 * (parsedPayload.batteryLevel / 15);
                                 parsedPayload.temperature = parsedPayload.temperature - 32;
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         } else if (sensor.sensorType === "motion_PIR") {
                             parser.extract("motion_PIR", function (parsedPayload) {
@@ -241,6 +246,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.batteryLevel = 100 * (parsedPayload.batteryLevel / 15);
                                 parsedPayload.temperature = parsedPayload.temperature - 32;
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         } else if (sensor.sensorType === "sound_level") {
                             parser.extract("sound_level", function (parsedPayload) {
@@ -248,6 +254,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.batteryLevel = 100 * (parsedPayload.batteryLevel / 15);
                                 parsedPayload.temperature = parsedPayload.temperature - 32;
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         } else if (sensor.sensorType === "door_window") {
                             parser.extract("door_window", function (parsedPayload) {
@@ -255,6 +262,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.batteryLevel = 100 * (parsedPayload.batteryLevel / 15);
                                 parsedPayload.temperature = parsedPayload.temperature - 32;
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         } else if (sensor.sensorType === "water_leak") {
                             parser.extract("water_leak", function (parsedPayload) {
@@ -263,6 +271,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.temperature = parsedPayload.temperature - 32;
                                 parsedPayload.temperature_env = parsedPayload.temperature_env - 32;
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         } else if (sensor.sensorType === "IAQ") {
                             parser.extract("IAQ", function (parsedPayload) {
@@ -271,6 +280,7 @@ server.on('published', function (packet, client) {
                                 parsedPayload.temperature = parsedPayload.temperature - 32;
                                 parsedPayload.temperature_env = parsedPayload.temperature_env - 32;
                                 console.log(parsedPayload);
+                                sendData(sensor, parsedPayload, jsonPayload.time);
                             });
                         }
                         parser.parse(data);
@@ -284,6 +294,20 @@ server.on('published', function (packet, client) {
 
     }
 });
+
+async function sendData(sensor, data, t) {
+    const formData = [];
+    for (const key of Object.keys(data)) {
+        formData.push({
+            pid: `${key}:${sensor.devEUI}`,
+            v: data[key]
+        })
+    }
+    console.log(formData);
+    await axios.post(`https://api.negawatt.co/io/v1/negaports/${negaportId}/data?token=${negaportToken}`, {
+        form: [{ t, data: formData }]
+    });
+}
 
 server.on('ready', setup);
 
